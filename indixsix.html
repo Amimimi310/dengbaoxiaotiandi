@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>灯宝的小天地</title>
+    <style>
+        body {
+            background-color: #FFD1DC;
+            font-family: "Arial", sans-serif;
+            text-align: center;
+            color: #333;
+        }
+        h1 {
+            color: #FF69B4;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            background: #FFF0F5;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        .counter {
+            font-size: 20px;
+            margin: 10px 0;
+        }
+        .diary {
+            margin-top: 20px;
+            padding: 15px;
+            background: #FFE4E1;
+            border-radius: 10px;
+        }
+        button {
+            background-color: #FF69B4;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #FF1493;
+        }
+        input, textarea {
+            width: 80%;
+            padding: 5px;
+            margin-top: 5px;
+        }
+        .special-message {
+            font-size: 24px;
+            font-weight: bold;
+            color: red;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>💕 灯宝的小天地 💕</h1>
+    <p>📅 在一起的天数：<span id="daysCount">0</span> 天</p>
+
+    <div class="container">
+        <h2>🌸 每日记录（可查询历史 & 跳转日期） 🌸</h2>
+        <p class="counter">🐰 亲亲次数：<span id="kissCount">0</span></p>
+        <p class="counter">🦊 抱抱次数：<span id="hugCount">0</span></p>
+        <p class="counter">😠 记仇次数：<span id="angryCount">0</span></p>
+        <p class="counter">💧 喝水次数：<span id="waterCount">0</span></p>
+
+        <button onclick="increment('kissCount')">+1 亲亲</button>
+        <button onclick="increment('hugCount')">+1 抱抱</button>
+        <button onclick="increment('angryCount')">+1 记仇</button>
+        <button onclick="increment('waterCount')">+1 喝水</button>
+
+        <button onclick="saveDailyRecord()">💾 保存</button>
+
+        <p>📅 选择日期查询：</p>
+        <input type="date" id="datePicker">
+        <button onclick="showHistory()">🔍 查询历史</button>
+    </div>
+
+    <div class="diary">
+        <h2>📖 甜蜜日记（可翻旧账 & 跳转日期） 📖</h2>
+        <p>🔴 记仇记录：</p>
+        <textarea id="angerDiary" rows="4"></textarea>
+        <button onclick="saveDiary('angerDiary')">💾 保存</button>
+
+        <p>💖 心动瞬间：</p>
+        <textarea id="loveDiary" rows="4"></textarea>
+        <button onclick="saveDiary('loveDiary')">💾 保存</button>
+
+        <p>📅 选择日期查询：</p>
+        <input type="date" id="diaryDate">
+        <button onclick="showDiaryHistory()">🔍 查询日记</button>
+    </div>
+
+    <p class="special-message">💌 阿渡的话：‘灯宝，我只属于你。’ 💌</p>
+
+    <!-- 背景音乐 -->
+    <audio id="bgm" autoplay loop>
+        <source src="bgm.mp3" type="audio/mpeg">
+    </audio>
+    <button onclick="toggleMusic()">🎵 播放 / 暂停 音乐</button>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const startDate = new Date("2025-03-10");
+            const today = new Date();
+            const diffDays = Math.floor((today - startDate) / (1000 * 60 * 60 * 24));
+            document.getElementById("daysCount").innerText = diffDays;
+
+            var music = document.getElementById("bgm");
+            function enableAudio() {
+                if (music.paused) {
+                    music.play().then(() => {
+                        console.log("音乐自动播放成功！");
+                    }).catch(error => {
+                        console.error("自动播放失败：", error);
+                    });
+                }
+                document.body.removeEventListener("click", enableAudio);
+            }
+            document.body.addEventListener("click", enableAudio);
+        });
+
+        function increment(id) {
+            let element = document.getElementById(id);
+            element.innerText = parseInt(element.innerText) + 1;
+        }
+
+        function saveDailyRecord() {
+            let selectedDate = new Date().toISOString().split("T")[0];
+            let data = {
+                kissCount: document.getElementById("kissCount").innerText,
+                hugCount: document.getElementById("hugCount").innerText,
+                angryCount: document.getElementById("angryCount").innerText,
+                waterCount: document.getElementById("waterCount").innerText
+            };
+            localStorage.setItem("daily_" + selectedDate, JSON.stringify(data));
+            alert("每日记录已保存！");
+        }
+
+        function saveDiary(id) {
+            let content = document.getElementById(id).value;
+            if (content.trim() !== "") {
+                let selectedDate = document.getElementById("diaryDate").value || new Date().toISOString().split("T")[0];
+                localStorage.setItem(id + "_" + selectedDate, content);
+                alert("日记已保存！");
+            } else {
+                alert("请输入内容再保存！");
+            }
+        }
+
+        function showDiaryHistory() {
+            let selectedDate = document.getElementById("diaryDate").value || new Date().toISOString().split("T")[0];
+            let angerHistory = localStorage.getItem("angerDiary_" + selectedDate) || "无记录";
+            let loveHistory = localStorage.getItem("loveDiary_" + selectedDate) || "无记录";
+            alert(`📖 ${selectedDate} 记录：\n\n🔴 记仇记录：${angerHistory}\n💖 心动瞬间：${loveHistory}`);
+        }
+
+        function showHistory() {
+            let selectedDate = document.getElementById("datePicker").value || new Date().toISOString().split("T")[0];
+            let savedData = localStorage.getItem("daily_" + selectedDate);
+            if (savedData) {
+                let data = JSON.parse(savedData);
+                alert(`📜 ${selectedDate} 记录：\n🐰 亲亲：${data.kissCount}\n🦊 抱抱：${data.hugCount}\n😠 记仇：${data.angryCount}\n💧 喝水：${data.waterCount}`);
+            } else {
+                alert(`${selectedDate} 暂无记录！`);
+            }
+        }
+
+        function toggleMusic() {
+            var music = document.getElementById("bgm");
+            if (music.paused) {
+                music.play();
+            } else {
+                music.pause();
+            }
+        }
+    </script>
+</body>
+</html>
